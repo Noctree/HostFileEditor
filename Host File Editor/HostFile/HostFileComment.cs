@@ -4,19 +4,22 @@ using System.Text;
 
 namespace Host_File_Editor
 {
-    public class HostFileComment : IHostFileEntry
+    public class HostFileComment : IHostFileComment
     {
         private static StringBuilder sb = new StringBuilder();
-        public string PrettyComment { get; }
-        public string Comment { get; }
-        public HostFileComment(string comment) {
+        public string? Comment { get; set; }
+        public HostFileComment(string? comment) {
             Comment = comment;
-            if (Comment.StartsWith('#'))
-                Comment = Comment.Remove(0, 1);
-            PrettyComment = Comment.Trim();
+            if (Comment != null) { 
+                if (Comment.StartsWith('#'))
+                    Comment = Comment.Remove(0, 1);
+                Comment = Comment.Trim();
+            }
         }
 
         public string Serialize() {
+            if (string.IsNullOrEmpty(Comment))
+                return string.Empty;
             sb.Clear();
             sb.Append('#');
             foreach (var ch in Comment) {

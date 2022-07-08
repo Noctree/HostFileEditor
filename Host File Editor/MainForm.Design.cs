@@ -10,6 +10,8 @@ namespace Host_File_Editor
     {
         private Size MinButtonSize = new Size(100, 30);
         private Size RoutingToggleSize = new Size(30, 30);
+        private Color AddressInvalidColor = Colors.IndianRed;
+        private Color AddressValidColor = SystemColors.Control;
         private void BuildUI() {
             SuspendLayout();
             Table = new TableLayout(1, 3);
@@ -20,7 +22,7 @@ namespace Host_File_Editor
             Label space = new Label();
             space.Text = new string(' ', 25);
             Label space2 = new Label();
-            space2.Text = new string(' ', 25);
+            space2.Text = space.Text;
 
             SaveButton = new Button((sender, args) => SaveFile());
             SaveButton.Text = "Save";
@@ -62,15 +64,15 @@ namespace Host_File_Editor
             entryButtonContainer.ResumeLayout();
 
             Table.SuspendLayout();
-            Table.Add(fileButtonContainer, 0, 0);
-            Table.Add(entryButtonContainer, 0, 1);
+            Table.Add(fileButtonContainer, 0, 1);
+            Table.Add(entryButtonContainer, 0, 0);
             Table.Add(RoutingTableView, 0, 2, true, true);
 
             Content = Table;
 
             Table.ResumeLayout();
             ResumeLayout();
-            MinimumSize = new Size(3*2 + 2*2 + 110 + MinButtonSize.Width * 2, 500);
+            MinimumSize = new Size(3*2 + 2*2 + 110 + 150 * 3, 500);
             SetupRoutingTableView();
         }
 
@@ -79,33 +81,45 @@ namespace Host_File_Editor
             RoutingTableView.AllowEmptySelection = true;
             RoutingTableView.AllowMultipleSelection = true;
             RoutingTableView.ShowHeader = true;
+            RoutingTableView.CellDoubleClick += EditEntry;
             RoutingTableView.Columns.Add(new GridColumn() {
                 HeaderText = "",
                 Expand = false,
                 Resizable = false,
                 Sortable = false,
+                Editable = true,
                 Width = RoutingToggleSize.Width,
+                DataCell = new CheckBoxCell() { Binding = (IIndirectBinding<bool?>)new PropertyBinding<bool?>("Enabled") }
             });
             RoutingTableView.Columns.Add(new GridColumn() {
                 HeaderText = "Source",
                 Expand = false,
                 Resizable = true,
                 Sortable = false,
-                AutoSize = true
+                MinWidth = 150,
+                DataCell = new GenericGridViewCell<IHostFileEntry>() {
+                    BackgroundColorSelector = entry => entry.SourceValid ? AddressValidColor : AddressInvalidColor,
+                    ObjectToString = entry => entry.Source
+                }
             });
             RoutingTableView.Columns.Add(new GridColumn() {
                 HeaderText = "Destination",
                 Expand = false,
                 Resizable = true,
                 Sortable = false,
-                AutoSize = true
+                MinWidth = 150,
+                DataCell = new GenericGridViewCell<IHostFileEntry>() {
+                    BackgroundColorSelector = entry => entry.DestinationValid ? AddressValidColor : AddressInvalidColor,
+                    ObjectToString = entry => entry.Destination
+                }
             });
             RoutingTableView.Columns.Add(new GridColumn() {
                 HeaderText = "Description",
                 Expand = true,
                 Resizable = true,
                 Sortable = false,
-                AutoSize = true
+                MinWidth = 150,
+                DataCell = new TextBoxCell() { Binding = new DelegateBinding<IHostFileEntry, string?>(entry => entry.Comment is null? String.Empty : entry.Comment.Comment, (entry, comment) => { if (entry.Comment is null) entry.Comment = new HostFileComment(comment); else entry.Comment.Comment = comment; }) }
             });
         }
 

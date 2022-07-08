@@ -5,16 +5,14 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Host_File_Editor</RootNamespace>
     <Nullable>enable</Nullable>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
+    <AnalysisLevel>6.0-all</AnalysisLevel>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\.editorconfig" Link=".editorconfig" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Eto.Forms" Version="2.7.0" />
     <PackageReference Include="Eto.Platform.Gtk" Version="2.7.0" />
-    <PackageReference Include="Eto.Platform.Windows" Version="2.7.0" />
+    <PackageReference Include="GtkSharp" Version="3.24.24.38" />
   </ItemGroup>
 
 </Project>

@@ -7,28 +7,47 @@ namespace Host_File_Editor
 {
     internal static class HostFileParser
     {
-        private const string WindowsHostFileLocation = "drivers/etc/hosts";
+        private const string WindowsHostFileLocationConst = "drivers/etc/hosts";
+        private const string LinuxHostFileLocation = "/etc/hosts";
+        private static string WindowsHostFileLocation => Path.Combine(Environment.SystemDirectory, WindowsHostFileLocationConst);
         public enum Platform { Windows, Linux }
 
-        public static bool ParseHostFile(Platform platform, out List<IHostFileEntry> result) {
-            result = new List<IHostFileEntry>();
+        public static List<IHostFileContent> LoadPlatformHostFile(Platform platform) {
             if (platform == Platform.Windows)
-                return ParseWindowsHostFile(result);
+                return LoadWindowsHostFile();
             else if (platform == Platform.Linux)
-                return ParseLinuxHostFile();
+                return LoadLinuxHostFile();
             else
-                throw new NotSupportedException();
+                throw new PlatformNotSupportedException();
         }
 
-        private static bool ParseWindowsHostFile(List<IHostFileEntry> output) {
+        private static List<IHostFileContent> LoadWindowsHostFile() {
+            using var stream = File.Open(WindowsHostFileLocation, FileMode.Open, FileAccess.Read);
+            return LoadHostFile(stream);
+        }
+        private static List<IHostFileContent> LoadLinuxHostFile() {
+            using var stream = File.Open(LinuxHostFileLocation, FileMode.OpenOrCreate, FileAccess.Read);
+            return LoadHostFile(stream);
+        }
+
+        public static List<IHostFileContent> LoadHostFile(Stream stream) {
+            List<IHostFileContent> output = new List<IHostFileContent>();
             var sb = new StringBuilder();
-            string path = Path.Combine(Environment.SystemDirectory, WindowsHostFileLocation);
-            using var stream = File.Open(path, FileMode.Open, FileAccess.Read);
             using var reader = new StreamReader(stream);
+            int whitespaceCounter = 0;
             while (!reader.EndOfStream) {
                 string line = reader.ReadLine() ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(line))
+                if (string.IsNullOrWhiteSpace(line)) {
+                    ++whitespaceCounter;
                     continue;
+                } else if (whitespaceCounter > 0) {
+                    if (sb.Length > 0) {
+                        output.Add(new HostFileComment(sb.ToString()));
+                        sb.Clear();
+                    }
+                    output.Add(new HostFileWhitespace(whitespaceCounter));
+                    whitespaceCounter = 0;
+                }
                 bool isComment = line.StartsWith('#');
                 var split = line.Split(' ', 3);
                 if (isComment)
@@ -46,18 +65,34 @@ namespace Host_File_Editor
                     HostFileComment? comment = null;
                     if (split.Length == 3)
                         comment = new HostFileComment(split[2]);
-                    if (!HostFileEntry.TryCreate(split[1], split[0], comment, enabled, out var entry) || entry is null)
-                        return false;
-                    output.Add(entry);
+                    output.Add(new HostFileEntry(split[1], split[0], comment, enabled));
                 }
             }
             if (sb.Length > 0)
                 output.Add(new HostFileComment(sb.ToString()));
-            return true;
+            return output;
         }
 
-        private static bool ParseLinuxHostFile() {
-            return false;
+        public static void SavePlatformHostFile(Platform platform, IList<IHostFileContent> content) {
+            if (platform == Platform.Windows) {
+                using var stream = File.Open(WindowsHostFileLocation, FileMode.Truncate, FileAccess.Write);
+                SaveHostFile(stream, content);
+            }
+            else if (platform == Platform.Linux) {
+                using var stream = File.Open(LinuxHostFileLocation, FileMode.Truncate, FileAccess.Write);
+                SaveHostFile(stream, content);
+            }
+            else
+                throw new PlatformNotSupportedException();
+        }
+
+        public static void SaveHostFile(Stream stream, IList<IHostFileContent> content) {
+            using var writer = new StreamWriter(stream);
+            foreach (var entry in content) {
+                if (entry is HostFileWhitespace space)
+                    space.WhitespaceCount -= 1;
+                writer.WriteLine(entry.Serialize());
+            }
         }
     }
 }

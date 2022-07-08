@@ -7,14 +7,14 @@ namespace Host_File_Editor
     internal class Program
     {
         [STAThread]
-        static void Main(string[] args) {
-            Console.WriteLine("Parse success? " + HostFileParser.ParseHostFile(HostFileParser.Platform.Windows, out var parsedFile));
+        static void Main() {
+            var parsedFile = HostFileParser.LoadPlatformHostFile(HostFileParser.Platform.Windows);
             foreach (var entry in parsedFile)
                 Console.WriteLine(entry.Serialize());
             Console.ReadKey();
 
-            //Application app = new Application();
-            //app.Run(new MainForm());
+            Application app = new Application(new Eto.GtkSharp.Platform());
+            app.Run(new MainForm());
         }
     }
 }
