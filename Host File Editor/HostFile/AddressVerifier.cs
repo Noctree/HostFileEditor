@@ -14,6 +14,8 @@ namespace Host_File_Editor
         public static bool IsValidIPV6Address(string address) => IPV6Verifier.IsMatch(address);
         public static bool IsValidDomainName(string domainName) => DomainNameVerifier.IsMatch(domainName);
 
+        public static bool IsValidIPAddress(string address) => IsValidIPv4Address(address) || IsValidIPV6Address(address);
+
         public static bool IsValidAddress(string address) => IsValidIPv4Address(address) || IsValidIPV6Address(address) || IsValidDomainName(address);
     }
 }

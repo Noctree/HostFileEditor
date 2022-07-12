@@ -14,19 +14,21 @@ namespace Host_File_Editor
         public IList<IHostFileContent> HostFileContent { get; private set; }
         private string presetName;
         private Uri presetLocation;
+        private bool closed = false;
         public PresetDownloader() {
             BuildUI();
         }
 
         public new void ShowModal() => throw new NotSupportedException();
-        public void ShowModal(string presetName, Uri presetLocation) {
+        public void DownloadPreset(string presetName, Uri presetLocation) {
             this.presetName = presetName;
             this.presetLocation = presetLocation;
+            closed = false;
+            Task.Run(async () => { await Task.Delay(10); Download(); });
             base.ShowModal();
         }
 
-        protected override void OnShown(EventArgs e) {
-            base.OnShown(e);
+        private void Download() {
             progressBar.Value = 0;
             Title = "Preset downloader - " + presetName;
             progressDescription.Text = $"Downloading preset from {presetLocation}...";
@@ -42,7 +44,8 @@ namespace Host_File_Editor
                 Application.Instance.RunIteration();
                 Thread.Sleep(32);
             }
-            Close();
+            progressDescription.Text = "Finished";
+            Thread.Sleep(250);
         }
     }
 }

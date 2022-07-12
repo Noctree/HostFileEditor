@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Eto;
 using Eto.Forms;
@@ -22,7 +23,9 @@ namespace Host_File_Editor
 
             Label l1 = new Label() { Text = "Presets: " };
             presetSelect = new DropDown();
-            presetSelect.DataStore = presets as IEnumerable<object>;
+            foreach (var preset in presets)
+                presetSelect.Items.Add(preset.Item1);
+            presetSelect.SelectedValueBinding.DataValueChanged += OnPresetSelected;
 
             ConfirmButton = new Button() { Text = "Append Preset" };
             CancelButton = new Button() { Text = "Cancel" };
@@ -41,6 +44,21 @@ namespace Host_File_Editor
             CancelButton.Click += OnCancel;
             ConfirmButton.Click += OnConfirm;
         }
+        private void BuildProgressUI() {
+            MinimumSize = new Eto.Drawing.Size(100, 50);
+            progressLayout = new TableLayout(1, 2);
+            progressBar = new ProgressBar() { Indeterminate = true };
+            progressDescription = new Label();
+
+            progressLayout.SuspendLayout();
+            progressLayout.Add(progressBar, 0, 0);
+            progressLayout.Add(progressDescription, 0, 1);
+            progressLayout.ResumeLayout();
+        }
+
+        TableLayout progressLayout;
+        ProgressBar progressBar;
+        Label progressDescription;
 
         TableLayout layout;
         DropDown presetSelect;

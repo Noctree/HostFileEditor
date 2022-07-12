@@ -20,7 +20,7 @@ namespace Host_File_Editor
         public string Destination {
             get => destination;
             set {
-                DestinationValid = AddressVerifier.IsValidAddress(value);
+                DestinationValid = AddressVerifier.IsValidIPAddress(value);
                 destination = value;
             }
         }

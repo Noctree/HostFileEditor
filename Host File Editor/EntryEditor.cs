@@ -11,6 +11,8 @@ namespace Host_File_Editor
         public DialogResult Result { get; private set; }
         private HostFileEntry entry;
         public EntryEditor() {
+            Resizable = true;
+            MinimumSize = new Eto.Drawing.Size(500, 150);
             BuildUI();
         }
 

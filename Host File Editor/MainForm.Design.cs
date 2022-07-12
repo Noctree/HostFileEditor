@@ -12,6 +12,7 @@ namespace Host_File_Editor
         private Size RoutingToggleSize = new Size(30, 30);
         private Color AddressInvalidColor = Colors.IndianRed;
         private Color AddressValidColor = SystemColors.Control;
+        private Color SourceAddressNotValid = Colors.LightYellow;
         private void BuildUI() {
             SuspendLayout();
             Table = new TableLayout(1, 3);
@@ -98,7 +99,7 @@ namespace Host_File_Editor
                 Sortable = false,
                 MinWidth = 150,
                 DataCell = new GenericGridViewCell<IHostFileEntry>() {
-                    BackgroundColorSelector = entry => entry.SourceValid ? AddressValidColor : AddressInvalidColor,
+                    BackgroundColorSelector = entry => entry.SourceValid ? AddressValidColor : SourceAddressNotValid,
                     ObjectToString = entry => entry.Source
                 }
             });

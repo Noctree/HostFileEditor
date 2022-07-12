@@ -72,10 +72,9 @@ namespace Host_File_Editor
         private void PickPreset() {
             presetSelector.ShowModal();
             if (presetSelector.Result == DialogResult.Ok) {
-                Application.Instance.RunIteration();
-                presetDownloader.ShowModal(presetSelector.SelectedPresetName, new Uri(presetSelector.SelectedPresetLink));
-                entries.AddRange(presetDownloader.HostFileContent);
-                tableEntries.AddRange(presetDownloader.HostFileContent.Where(entry => entry is IHostFileEntry));
+                entries.AddRange(presetSelector.HostFileContent);
+                tableEntries.AddRange(presetSelector.HostFileContent.Where(entry => entry is IHostFileEntry));
+                RoutingTableView.Invalidate();
             }
         }
 

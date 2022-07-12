@@ -21,6 +21,8 @@ namespace Host_File_Editor
             layout.Add(progressDescription, 0, 1);
             layout.ResumeLayout();
 
+            Content = layout;
+
             ResumeLayout();
         }
 
